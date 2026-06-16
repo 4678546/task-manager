@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sakura.taskmanager.mapper.TaskMapper">
+    <select id="list" resultType="com.sakura.taskmanager.entity.Task">
+        select * from task
+        <where>
+            user_id=#{userId}
+
+            <if test="status!=null">
+                and status=#{status}
+            </if>
+
+             <if test="deadline!=null">
+                and deadline=#{deadline}
+             </if>
+        </where>
+    </select>
+    <update id="update" parameterType="com.sakura.taskmanager.entity.Task">
+        UPDATE task
+        <set>
+            <if test="title!=null">
+                title=#{title},
+            </if>
+            <if test="content!=null">
+                content=#{content},
+            </if>
+            <if test="deadline!=null">
+                deadline=#{deadline},
+            </if>
+            <if test="status!=null">
+                status=#{status},
+            </if>
+            <if test="updateTime!=null">
+                update_time=#{updateTime},
+            </if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+</mapper>

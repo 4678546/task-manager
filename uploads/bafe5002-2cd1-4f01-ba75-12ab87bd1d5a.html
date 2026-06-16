@@ -1,0 +1,1094 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>任务管理接口测试</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f6f8fb;
+      --panel: #ffffff;
+      --line: #d9e0ea;
+      --text: #202938;
+      --muted: #667085;
+      --blue: #2563eb;
+      --blue-dark: #1d4ed8;
+      --green: #0f766e;
+      --red: #b42318;
+      --amber: #b54708;
+      --code: #101828;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: "Microsoft YaHei", "PingFang SC", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    header {
+      background: var(--panel);
+      border-bottom: 1px solid var(--line);
+      padding: 18px 24px;
+    }
+
+    main {
+      width: min(1280px, calc(100% - 32px));
+      margin: 20px auto 40px;
+    }
+
+    h1,
+    h2,
+    h3 {
+      margin: 0;
+      line-height: 1.25;
+    }
+
+    h1 {
+      font-size: 22px;
+      font-weight: 700;
+    }
+
+    h2 {
+      font-size: 17px;
+      margin-bottom: 12px;
+    }
+
+    h3 {
+      font-size: 15px;
+      margin-bottom: 10px;
+    }
+
+    .muted {
+      color: var(--muted);
+    }
+
+    .page-note {
+      margin-top: 6px;
+      color: var(--muted);
+    }
+
+    .notice {
+      display: none;
+      margin-top: 12px;
+      border: 1px solid #fdb022;
+      border-radius: 6px;
+      background: #fffaeb;
+      color: #93370d;
+      padding: 10px 12px;
+      font-weight: 600;
+    }
+
+    .grid {
+      display: grid;
+      gap: 16px;
+    }
+
+    .two-cols {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .three-cols {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 16px;
+    }
+
+    .endpoint {
+      border-top: 1px solid var(--line);
+      padding-top: 14px;
+      margin-top: 14px;
+    }
+
+    .endpoint:first-of-type {
+      border-top: 0;
+      padding-top: 0;
+      margin-top: 0;
+    }
+
+    .endpoint-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .path {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    .method {
+      min-width: 62px;
+      padding: 3px 8px;
+      border-radius: 4px;
+      background: #e8eefc;
+      color: #174ea6;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 12px;
+      font-weight: 700;
+      text-align: center;
+    }
+
+    .method.post {
+      background: #e7f8f3;
+      color: #047857;
+    }
+
+    .method.put,
+    .method.patch {
+      background: #fff3dc;
+      color: #9a5215;
+    }
+
+    .method.delete {
+      background: #fee4e2;
+      color: #b42318;
+    }
+
+    code {
+      color: var(--code);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 13px;
+      overflow-wrap: anywhere;
+    }
+
+    label {
+      display: grid;
+      gap: 5px;
+      color: #344054;
+      font-weight: 600;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      background: #ffffff;
+      color: var(--text);
+      padding: 8px 10px;
+      font: inherit;
+      min-height: 38px;
+    }
+
+    textarea {
+      min-height: 76px;
+      resize: vertical;
+    }
+
+    input[type="checkbox"] {
+      width: auto;
+      min-height: auto;
+    }
+
+    .inline {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 500;
+      color: var(--muted);
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    button {
+      border: 1px solid transparent;
+      border-radius: 6px;
+      background: var(--blue);
+      color: #ffffff;
+      cursor: pointer;
+      font: inherit;
+      font-weight: 700;
+      min-height: 36px;
+      padding: 8px 12px;
+    }
+
+    button:hover {
+      background: var(--blue-dark);
+    }
+
+    button.secondary {
+      background: #ffffff;
+      border-color: #cbd5e1;
+      color: #344054;
+    }
+
+    button.secondary:hover {
+      background: #f8fafc;
+    }
+
+    button.danger {
+      background: var(--red);
+    }
+
+    button.danger:hover {
+      background: #912018;
+    }
+
+    button:disabled {
+      cursor: not-allowed;
+      opacity: 0.62;
+    }
+
+    .response {
+      margin-top: 10px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #0b1220;
+      color: #e5e7eb;
+      max-height: 280px;
+      overflow: auto;
+      padding: 10px;
+      white-space: pre-wrap;
+      word-break: break-word;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 12px;
+    }
+
+    .status-line {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      padding: 3px 9px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .badge.idle {
+      background: #eef2f6;
+      color: #475467;
+    }
+
+    .badge.ok {
+      background: #dcfae6;
+      color: #067647;
+    }
+
+    .badge.fail {
+      background: #fee4e2;
+      color: #b42318;
+    }
+
+    .badge.warn {
+      background: #fef0c7;
+      color: #b54708;
+    }
+
+    .log {
+      min-height: 220px;
+      max-height: 420px;
+    }
+
+    a {
+      color: var(--blue);
+      text-decoration: none;
+      font-weight: 700;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    .notice a {
+      color: #7a2e0e;
+      text-decoration: underline;
+    }
+
+    @media (max-width: 900px) {
+      main {
+        width: min(100% - 20px, 1280px);
+        margin-top: 12px;
+      }
+
+      header {
+        padding: 14px 16px;
+      }
+
+      .two-cols,
+      .three-cols {
+        grid-template-columns: 1fr;
+      }
+
+      .endpoint-head {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>任务管理接口测试</h1>
+    <div class="page-note">默认请求当前后端服务。建议通过 <code>/uploads/api-test.html</code> 打开，避免跨域。</div>
+    <div id="openNotice" class="notice"></div>
+  </header>
+
+  <main class="grid">
+    <section class="panel">
+      <h2>基础配置</h2>
+      <div class="grid three-cols">
+        <label>
+          服务地址
+          <input id="baseUrl" value="" placeholder="留空表示使用当前页面同源地址">
+        </label>
+        <label>
+          用户名
+          <input id="username" value="sakura" autocomplete="username">
+        </label>
+        <label>
+          密码
+          <input id="password" value="123456" type="text" autocomplete="off">
+        </label>
+      </div>
+      <div class="grid two-cols" style="margin-top: 12px;">
+        <label>
+          Bearer Token
+          <textarea id="token" placeholder="登录成功后会自动填入 token"></textarea>
+        </label>
+        <label>
+          全局日志
+          <pre id="globalLog" class="response log">等待请求...</pre>
+        </label>
+      </div>
+      <div class="actions">
+        <button id="runSmoke">一键测试主要接口</button>
+        <button id="runFull" class="secondary">一键测试含改密还原</button>
+        <button id="clearToken" class="secondary">清空 Token</button>
+        <button id="clearLog" class="secondary">清空日志</button>
+      </div>
+      <div class="status-line">
+        <span id="baseStatus" class="badge idle">未请求</span>
+        <span class="muted">主要接口会覆盖注册、登录、用户信息、任务增删改查、文件上传、文件访问、退出登录。</span>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>用户接口</h2>
+
+      <div class="endpoint">
+        <div class="endpoint-head">
+          <div class="path"><span class="method post">POST</span><code>/user/register</code></div>
+          <button data-action="register">注册</button>
+        </div>
+        <pre id="out-register" class="response">未请求</pre>
+      </div>
+
+      <div class="endpoint">
+        <div class="endpoint-head">
+          <div class="path"><span class="method post">POST</span><code>/user/login</code></div>
+          <button data-action="login">登录并保存 Token</button>
+        </div>
+        <pre id="out-login" class="response">未请求</pre>
+      </div>
+
+      <div class="endpoint">
+        <div class="endpoint-head">
+          <div class="path"><span class="method">GET</span><code>/user/info</code></div>
+          <button data-action="userInfo">获取用户信息</button>
+        </div>
+        <pre id="out-userInfo" class="response">未请求</pre>
+      </div>
+
+      <div class="endpoint">
+        <div class="endpoint-head">
+          <div class="path"><span class="method patch">PATCH</span><code>/user/updatePwd</code></div>
+          <button data-action="updatePwd">修改密码</button>
+        </div>
+        <div class="grid three-cols">
+          <label>
+            旧密码
+            <input id="oldPwd" value="123456" type="text" autocomplete="off">
+          </label>
+          <label>
+            新密码
+            <input id="newPwd" value="1234567" type="text" autocomplete="off">
+          </label>
+          <label>
+            确认新密码
+            <input id="rePwd" value="1234567" type="text" autocomplete="off">
+          </label>
+        </div>
+        <pre id="out-updatePwd" class="response">未请求</pre>
+      </div>
+
+      <div class="endpoint">
+        <div class="endpoint-head">
+          <div class="path"><span class="method post">POST</span><code>/user/logout</code></div>
+          <button data-action="logout" class="danger">退出登录</button>
+        </div>
+        <pre id="out-logout" class="response">未请求</pre>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>任务接口</h2>
+      <div class="grid three-cols">
+        <label>
+          任务 ID
+          <input id="taskId" inputmode="numeric" placeholder="查询、更新、删除使用">
+        </label>
+        <label>
+          任务标题
+          <input id="taskTitle" value="测试任务" maxlength="10">
+        </label>
+        <label>
+          任务状态
+          <select id="taskStatus">
+            <option value="TODO">TODO</option>
+            <option value="DOING">DOING</option>
+            <option value="DONE">DONE</option>
+          </select>
+        </label>
+      </div>
+      <div class="grid two-cols" style="margin-top: 12px;">
+        <label>
+          任务内容
+          <textarea id="taskContent">接口测试内容</textarea>
+        </label>
+        <label>
+          截止时间
+          <input id="taskDeadline" value="2026-12-31 23:59:59">
+        </label>
+      </div>
+
+      <div class="endpoint">
+        <div class="endpoint-head">
+          <div class="path"><span class="method post">POST</span><code>/task</code></div>
+          <button data-action="taskAdd">新增任务</button>
+        </div>
+        <pre id="out-taskAdd" class="response">未请求</pre>
+      </div>
+
+      <div class="endpoint">
+        <div class="endpoint-head">
+          <div class="path"><span class="method">GET</span><code>/task?pageNum=&amp;pageSize=&amp;status=&amp;deadline=</code></div>
+          <button data-action="taskList">分页查询任务</button>
+        </div>
+        <div class="grid three-cols">
+          <label>
+            页码
+            <input id="pageNum" value="1" inputmode="numeric">
+          </label>
+          <label>
+            每页条数
+            <input id="pageSize" value="10" inputmode="numeric">
+          </label>
+          <label>
+            状态筛选
+            <select id="filterStatus">
+              <option value="">不筛选</option>
+              <option value="TODO">TODO</option>
+              <option value="DOING">DOING</option>
+              <option value="DONE">DONE</option>
+            </select>
+          </label>
+        </div>
+        <label style="margin-top: 12px;">
+          截止时间筛选
+          <input id="filterDeadline" placeholder="yyyy-MM-dd HH:mm:ss">
+        </label>
+        <pre id="out-taskList" class="response">未请求</pre>
+      </div>
+
+      <div class="endpoint">
+        <div class="endpoint-head">
+          <div class="path"><span class="method">GET</span><code>/task/search?id=</code></div>
+          <button data-action="taskSearch">查询任务详情</button>
+        </div>
+        <pre id="out-taskSearch" class="response">未请求</pre>
+      </div>
+
+      <div class="endpoint">
+        <div class="endpoint-head">
+          <div class="path"><span class="method put">PUT</span><code>/task</code></div>
+          <button data-action="taskUpdate">更新任务</button>
+        </div>
+        <pre id="out-taskUpdate" class="response">未请求</pre>
+      </div>
+
+      <div class="endpoint">
+        <div class="endpoint-head">
+          <div class="path"><span class="method delete">DELETE</span><code>/task?id=</code></div>
+          <button data-action="taskDelete" class="danger">删除任务</button>
+        </div>
+        <pre id="out-taskDelete" class="response">未请求</pre>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>文件接口</h2>
+
+      <div class="endpoint">
+        <div class="endpoint-head">
+          <div class="path"><span class="method post">POST</span><code>/upload</code></div>
+          <button data-action="upload">上传文件</button>
+        </div>
+        <label>
+          文件
+          <input id="uploadFile" type="file">
+        </label>
+        <pre id="out-upload" class="response">未请求</pre>
+      </div>
+
+      <div class="endpoint">
+        <div class="endpoint-head">
+          <div class="path"><span class="method">GET</span><code>/uploads/{filename}</code></div>
+          <button data-action="readUploaded">访问上传文件</button>
+        </div>
+        <label>
+          文件访问路径
+          <input id="uploadedPath" placeholder="/uploads/xxx.txt">
+        </label>
+        <div class="status-line">
+          <a id="uploadedLink" href="#" target="_blank" rel="noreferrer">打开上传文件</a>
+        </div>
+        <pre id="out-readUploaded" class="response">未请求</pre>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const state = {
+      lastSmokeTitle: "",
+      lastSmokeContent: "",
+      lastUploadUrl: ""
+    };
+
+    function readStorage() {
+      const savedBaseUrl = localStorage.getItem("tmApiBaseUrl");
+      const savedToken = localStorage.getItem("tmApiToken");
+      if (savedToken) $("token").value = savedToken;
+      if (location.protocol.startsWith("http")) {
+        $("baseUrl").value = "";
+      } else if (savedBaseUrl) {
+        $("baseUrl").value = savedBaseUrl;
+      } else {
+        $("baseUrl").value = "http://localhost:8080";
+      }
+      updateOpenNotice();
+    }
+
+    function baseUrl() {
+      const value = $("baseUrl").value.trim() || location.origin || "http://localhost:8080";
+      return value.replace(/\/+$/, "");
+    }
+
+    function token() {
+      return $("token").value.trim();
+    }
+
+    function setToken(value) {
+      $("token").value = value || "";
+      if (value) {
+        localStorage.setItem("tmApiToken", value);
+      } else {
+        localStorage.removeItem("tmApiToken");
+      }
+    }
+
+    function saveBaseUrl() {
+      const value = $("baseUrl").value.trim();
+      if (value) {
+        localStorage.setItem("tmApiBaseUrl", value.replace(/\/+$/, ""));
+      } else {
+        localStorage.removeItem("tmApiBaseUrl");
+      }
+      updateOpenNotice();
+    }
+
+    function setBadge(kind, text) {
+      const badge = $("baseStatus");
+      badge.className = "badge " + kind;
+      badge.textContent = text;
+    }
+
+    function log(message) {
+      const time = new Date().toLocaleTimeString();
+      const current = $("globalLog").textContent;
+      const prefix = current === "等待请求..." ? "" : current + "\n";
+      $("globalLog").textContent = prefix + "[" + time + "] " + message;
+      $("globalLog").scrollTop = $("globalLog").scrollHeight;
+    }
+
+    function format(value) {
+      return JSON.stringify(value, null, 2);
+    }
+
+    function output(key, data) {
+      const node = $("out-" + key);
+      if (node) node.textContent = format(data);
+    }
+
+    function queryString(params) {
+      const search = new URLSearchParams();
+      Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined && value !== null && String(value).trim() !== "") {
+          search.set(key, value);
+        }
+      });
+      const value = search.toString();
+      return value ? "?" + value : "";
+    }
+
+    function updateOpenNotice() {
+      const notice = $("openNotice");
+      if (!notice) return;
+      if (location.protocol === "file:") {
+        const httpUrl = baseUrl() + "/uploads/api-test.html";
+        notice.style.display = "block";
+        notice.innerHTML = '当前是直接打开的本地文件，浏览器会拦截接口请求。请通过后端打开：<a href="' + httpUrl + '">' + httpUrl + '</a>';
+      } else {
+        notice.style.display = "none";
+        notice.textContent = "";
+      }
+    }
+
+    function endpoint(path) {
+      if (/^https?:\/\//i.test(path)) return path;
+      if (location.protocol.startsWith("http") && !$("baseUrl").value.trim()) {
+        return path;
+      }
+      return baseUrl() + path;
+    }
+
+    async function parseResponse(response) {
+      const contentType = response.headers.get("content-type") || "";
+      if (contentType.includes("application/json")) {
+        return await response.json();
+      }
+      if (contentType.startsWith("text/") || contentType.includes("xml") || contentType.includes("html")) {
+        return await response.text();
+      }
+      const blob = await response.blob();
+      return {
+        blobType: blob.type || contentType || "application/octet-stream",
+        blobSize: blob.size
+      };
+    }
+
+    async function callApi(key, options) {
+      saveBaseUrl();
+      const method = options.method || "GET";
+      const url = endpoint(options.path);
+      const headers = {};
+      let body;
+      let bodyPreview = null;
+
+      if (location.protocol === "file:") {
+        const result = {
+          request: {
+            method,
+            url,
+            headers,
+            body: null
+          },
+          error: "当前页面是 file:// 本地文件，浏览器会拦截接口请求。",
+          fix: "请点击页面顶部提示里的后端地址打开测试页，例如 http://localhost:8080/uploads/api-test.html"
+        };
+        output(key, result);
+        setBadge("fail", "打开方式不对");
+        log("请通过后端地址打开测试页后再请求接口");
+        return result;
+      }
+
+      if (options.auth) {
+        const currentToken = token();
+        if (currentToken) headers.Authorization = "Bearer " + currentToken;
+      }
+
+      if (options.type === "json") {
+        headers["Content-Type"] = "application/json";
+        body = JSON.stringify(options.body || {});
+        bodyPreview = options.body || {};
+      } else if (options.type === "form") {
+        headers["Content-Type"] = "application/x-www-form-urlencoded";
+        body = new URLSearchParams(options.body || {});
+        bodyPreview = Object.fromEntries(body.entries());
+      } else if (options.type === "multipart") {
+        body = options.body;
+        bodyPreview = "[FormData]";
+      }
+
+      const started = performance.now();
+      log(method + " " + url);
+
+      try {
+        const response = await fetch(url, { method, headers, body });
+        const responseBody = await parseResponse(response);
+        const result = {
+          request: {
+            method,
+            url,
+            headers,
+            body: bodyPreview
+          },
+          response: {
+            httpStatus: response.status,
+            ok: response.ok,
+            body: responseBody
+          },
+          durationMs: Math.round(performance.now() - started)
+        };
+        output(key, result);
+        const businessOk = responseBody && typeof responseBody === "object" && responseBody.code === 0;
+        setBadge(response.ok && (businessOk || responseBody.code === undefined) ? "ok" : "warn", method + " " + response.status);
+        return result;
+      } catch (error) {
+        const hint = String(error).includes("Failed to fetch")
+          ? "如果页面是双击打开的，请改用 http://localhost:8080/uploads/api-test.html；如果页面地址是 127.0.0.1，就让服务地址保持空白。"
+          : "";
+        const result = {
+          request: {
+            method,
+            url,
+            headers,
+            body: bodyPreview
+          },
+          error: String(error),
+          hint,
+          durationMs: Math.round(performance.now() - started)
+        };
+        output(key, result);
+        setBadge("fail", "请求失败");
+        throw error;
+      }
+    }
+
+    function username() {
+      return $("username").value.trim();
+    }
+
+    function password() {
+      return $("password").value;
+    }
+
+    function getTaskBody() {
+      const body = {
+        title: $("taskTitle").value.trim(),
+        content: $("taskContent").value,
+        status: $("taskStatus").value,
+        deadline: $("taskDeadline").value.trim()
+      };
+      const id = $("taskId").value.trim();
+      if (id) body.id = Number(id);
+      return body;
+    }
+
+    function getTaskItems(result) {
+      const data = result && result.response && result.response.body && result.response.body.data;
+      if (!data) return [];
+      if (Array.isArray(data.items)) return data.items;
+      if (Array.isArray(data)) return data;
+      return [];
+    }
+
+    function pickTaskId(result, title, content) {
+      const items = getTaskItems(result);
+      const matched = items.find((item) => item.title === title && item.content === content) || items[0];
+      if (matched && matched.id) {
+        $("taskId").value = matched.id;
+        return matched.id;
+      }
+      return "";
+    }
+
+    async function register() {
+      return await callApi("register", {
+        method: "POST",
+        path: "/user/register",
+        type: "form",
+        body: {
+          username: username(),
+          password: password()
+        }
+      });
+    }
+
+    async function login(name = username(), pwd = password()) {
+      const result = await callApi("login", {
+        method: "POST",
+        path: "/user/login",
+        type: "form",
+        body: {
+          username: name,
+          password: pwd
+        }
+      });
+      const body = result.response.body;
+      if (body && body.code === 0 && body.data) {
+        setToken(body.data);
+        log("Token 已保存");
+      }
+      return result;
+    }
+
+    async function userInfo() {
+      return await callApi("userInfo", {
+        method: "GET",
+        path: "/user/info",
+        auth: true
+      });
+    }
+
+    async function updatePwd(oldPwd = $("oldPwd").value, newPwd = $("newPwd").value, rePwd = $("rePwd").value) {
+      const result = await callApi("updatePwd", {
+        method: "PATCH",
+        path: "/user/updatePwd",
+        auth: true,
+        type: "json",
+        body: {
+          old_pwd: oldPwd,
+          new_pwd: newPwd,
+          re_pwd: rePwd
+        }
+      });
+      if (result.response.body && result.response.body.code === 0) {
+        setToken("");
+        log("密码修改成功，当前 Token 已失效");
+      }
+      return result;
+    }
+
+    async function logout() {
+      const result = await callApi("logout", {
+        method: "POST",
+        path: "/user/logout",
+        auth: true
+      });
+      if (result.response.body && result.response.body.code === 0) {
+        setToken("");
+      }
+      return result;
+    }
+
+    async function taskAdd() {
+      return await callApi("taskAdd", {
+        method: "POST",
+        path: "/task",
+        auth: true,
+        type: "json",
+        body: getTaskBody()
+      });
+    }
+
+    async function taskList(custom = {}) {
+      const params = {
+        pageNum: custom.pageNum || $("pageNum").value.trim(),
+        pageSize: custom.pageSize || $("pageSize").value.trim(),
+        status: custom.status === undefined ? $("filterStatus").value : custom.status,
+        deadline: custom.deadline === undefined ? $("filterDeadline").value.trim() : custom.deadline
+      };
+      return await callApi("taskList", {
+        method: "GET",
+        path: "/task" + queryString(params),
+        auth: true
+      });
+    }
+
+    async function taskSearch(id = $("taskId").value.trim()) {
+      return await callApi("taskSearch", {
+        method: "GET",
+        path: "/task/search" + queryString({ id }),
+        auth: true
+      });
+    }
+
+    async function taskUpdate() {
+      return await callApi("taskUpdate", {
+        method: "PUT",
+        path: "/task",
+        auth: true,
+        type: "json",
+        body: getTaskBody()
+      });
+    }
+
+    async function taskDelete(id = $("taskId").value.trim()) {
+      return await callApi("taskDelete", {
+        method: "DELETE",
+        path: "/task" + queryString({ id }),
+        auth: true
+      });
+    }
+
+    function uploadFormData() {
+      const formData = new FormData();
+      const selected = $("uploadFile").files[0];
+      if (selected) {
+        formData.append("file", selected);
+      } else {
+        const content = "task-manager api test " + new Date().toISOString();
+        formData.append("file", new Blob([content], { type: "text/plain" }), "api-test.txt");
+      }
+      return formData;
+    }
+
+    async function upload() {
+      const result = await callApi("upload", {
+        method: "POST",
+        path: "/upload",
+        auth: true,
+        type: "multipart",
+        body: uploadFormData()
+      });
+      const path = result.response.body && result.response.body.data;
+      if (path) {
+        $("uploadedPath").value = path;
+        $("uploadedLink").href = endpoint(path);
+        state.lastUploadUrl = path;
+      }
+      return result;
+    }
+
+    async function readUploaded() {
+      const path = $("uploadedPath").value.trim() || state.lastUploadUrl;
+      const result = await callApi("readUploaded", {
+        method: "GET",
+        path
+      });
+      if (path) $("uploadedLink").href = endpoint(path);
+      return result;
+    }
+
+    function setSmokeTask(prefix) {
+      const stamp = String(Date.now()).slice(-8);
+      const title = (prefix || "T") + stamp;
+      const content = "接口测试-" + stamp;
+      $("taskTitle").value = title;
+      $("taskContent").value = content;
+      $("taskStatus").value = "TODO";
+      $("taskDeadline").value = "2026-12-31 23:59:59";
+      $("filterStatus").value = "";
+      $("filterDeadline").value = "";
+      state.lastSmokeTitle = title;
+      state.lastSmokeContent = content;
+      return { title, content };
+    }
+
+    async function runSmoke(includePasswordChange) {
+      const buttons = Array.from(document.querySelectorAll("button"));
+      buttons.forEach((button) => button.disabled = true);
+      setBadge("idle", "测试中");
+      try {
+        log("开始一键测试");
+        await register().catch((error) => log("注册接口返回异常：" + error));
+        await login();
+        await userInfo();
+
+        if (includePasswordChange) {
+          const originalPwd = password();
+          const tempPwd = $("newPwd").value || "1234567";
+          if (originalPwd === tempPwd) {
+            throw new Error("新密码不能和当前密码相同，请调整新密码后再运行含改密测试");
+          }
+          await updatePwd(originalPwd, tempPwd, tempPwd);
+          await login(username(), tempPwd);
+          await updatePwd(tempPwd, originalPwd, originalPwd);
+          await login(username(), originalPwd);
+        }
+
+        const created = setSmokeTask("T");
+        await taskAdd();
+        const listResult = await taskList({ pageNum: 1, pageSize: 20 });
+        const id = pickTaskId(listResult, created.title, created.content);
+        if (!id) throw new Error("新增任务成功后未能从列表中定位任务 ID");
+
+        await taskSearch(id);
+        $("taskTitle").value = ("U" + String(Date.now()).slice(-8)).slice(0, 10);
+        $("taskContent").value = "接口测试更新-" + String(Date.now()).slice(-6);
+        $("taskStatus").value = "DONE";
+        $("taskDeadline").value = "2026-12-31 23:59:59";
+        await taskUpdate();
+        await taskSearch(id);
+        await taskList({ pageNum: 1, pageSize: 20, status: "DONE", deadline: "2026-12-31 23:59:59" });
+        await taskDelete(id);
+
+        await upload();
+        await readUploaded();
+        await logout();
+        setBadge("ok", "一键测试完成");
+        log("一键测试完成");
+      } catch (error) {
+        setBadge("fail", "一键测试中断");
+        log("一键测试中断：" + error.message);
+      } finally {
+        buttons.forEach((button) => button.disabled = false);
+      }
+    }
+
+    const actions = {
+      register,
+      login,
+      userInfo,
+      updatePwd,
+      logout,
+      taskAdd,
+      taskList,
+      taskSearch,
+      taskUpdate,
+      taskDelete,
+      upload,
+      readUploaded
+    };
+
+    document.addEventListener("click", async (event) => {
+      const actionName = event.target && event.target.dataset && event.target.dataset.action;
+      if (!actionName) return;
+      event.target.disabled = true;
+      try {
+        await actions[actionName]();
+      } catch (error) {
+        log(actionName + " 失败：" + error.message);
+      } finally {
+        event.target.disabled = false;
+      }
+    });
+
+    $("runSmoke").addEventListener("click", () => runSmoke(false));
+    $("runFull").addEventListener("click", () => runSmoke(true));
+    $("clearToken").addEventListener("click", () => {
+      setToken("");
+      log("Token 已清空");
+    });
+    $("clearLog").addEventListener("click", () => {
+      $("globalLog").textContent = "等待请求...";
+      setBadge("idle", "未请求");
+    });
+    $("baseUrl").addEventListener("change", saveBaseUrl);
+    $("token").addEventListener("change", () => setToken(token()));
+
+    readStorage();
+  </script>
+</body>
+</html>
