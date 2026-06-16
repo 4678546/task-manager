@@ -125,6 +125,10 @@ mvn spring-boot:run
 
 6. 使用 Postman 导入 `资料` 目录中的测试集合。先调用登录接口获取 token，再访问需要登录的接口。
 
+## 测试途径
+
+1.本地部署之后通过postman或其他接口测试软件进行测试2.本地部署之后浏览器访问http://localhost:8080/api-test.html 进行测试
+
 ## 测试账号
 
 `资料/task_manager.sql` 会初始化一个用户：
